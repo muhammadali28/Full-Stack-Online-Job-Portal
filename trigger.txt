@@ -1,0 +1,47 @@
+DELIMITER //
+    CREATE TRIGGER	before_insert_api BEFORE INSERT 
+    ON api_keys for each row
+    BEGIN
+        IF new.hit_limit > 5 THEN
+        signal sqlstate '45000';
+	SET MESSAGE_TEXT = 'Error aa mere bhai';
+        END IF; 
+    END;
+
+
+DELIMITER //
+    CREATE TRIGGER myTrigger AFTER UPDATE ON application
+    FOR EACH ROW
+    BEGIN
+       IF new.appstatus LIKE 'accepted' THEN
+          UPDATE JOBS SET nov = nov-1 where jobid = new.jobid;
+       END IF;
+    END;
+
+
+DELIMITER //
+    CREATE TRIGGER myTrigger AFTER UPDATE ON application
+    FOR EACH ROW
+    BEGIN
+    	DECLARE job_id INT(11);
+
+    	SELECT jobid 
+        into job_id
+        from application 
+        where appid = new.appid;
+        
+       IF new.appstatus LIKE 'accepted' THEN
+          UPDATE JOBS SET nov = nov-1 where jobid = jobid;
+       END IF;
+    END;
+
+DELIMITER //
+    CREATE TRIGGER secondTrigger AFTER UPDATE ON jobs
+    FOR EACH ROW
+    BEGIN
+    	        
+       IF new.nov=0 THEN
+          UPDATE JOBS SET jobstatus = 'close' where jobid=new.jobid;
+       
+	END IF;
+    END;
